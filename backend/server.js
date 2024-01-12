@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const mongoose = require("mongoose");
 const pullRoutes = require("./routes/thawing");
 
 // express app
@@ -18,6 +19,14 @@ app.use((req, res, next) => {
 // else, allow request to proceed
 app.use("/restaurant", pullRoutes);
 
-app.listen(process.env.PORT, () => {
-  console.log("listening on port " + process.env.PORT);
-});
+// connect to db
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    app.listen(process.env.PORT, () => {
+      console.log("connected to db and listening on port " + process.env.PORT);
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });

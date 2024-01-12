@@ -1,5 +1,8 @@
 const express = require("express");
 
+const User = require("../models/Users");
+const Food = require("../models/Food");
+
 const router = express.Router();
 
 // home page, depending on type of user
@@ -44,7 +47,10 @@ router
   .get((req, res) => {
     res.json({ mssg: "view and edit pars, or add new items" });
   })
+  // create a new food item or reset the par
   .post((req, res) => {
+    const { name, par } = req.body;
+
     res.json({ mssg: "sending a new par/item through!" });
     // redirect to home page
   });
