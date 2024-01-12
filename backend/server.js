@@ -13,8 +13,11 @@ app.use((req, res, next) => {
 });
 
 // Routes
+
+// if user not logged in, redirect to login
+// else, allow request to proceed
 app.use("/restaurant", pullRoutes);
 
 app.listen(process.env.PORT, () => {
-  console.log("listening on port 4000");
+  console.log("listening on port " + process.env.PORT);
 });
