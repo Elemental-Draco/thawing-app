@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { connectToDb, getDb } = require("./db");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -13,12 +14,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
-
-// if user not logged in, redirect to login
-// else, allow request to proceed
-app.use("/restaurant", pullRoutes);
-
 // connect to db
 mongoose
   .connect(process.env.MONGO_URI)
@@ -30,3 +25,19 @@ mongoose
   .catch((error) => {
     console.log(error);
   });
+
+// let db;
+// connectToDb((err) => {
+//   if (!err) {
+//     app.listen(process.env.PORT, () => {
+//       console.log("connected to db and listening on port " + process.env.PORT);
+//     });
+//     db = getDb();
+//   }
+// });
+
+// Routes
+
+// if user not logged in, redirect to login
+// else, allow request to proceed
+app.use("/restaurant", pullRoutes);

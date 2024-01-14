@@ -1,9 +1,12 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 
 const User = require("../models/Users");
 const Food = require("../models/Food");
 
 const router = express.Router();
+
+const jsonParser = bodyParser.json();
 
 // home page, depending on type of user
 router.get("/", (req, res) => {
@@ -42,16 +45,38 @@ router.post("/count-track", (req, res) => {
 });
 
 // edit pars
+
 router
   .route("/par-edit")
   .get((req, res) => {
     res.json({ mssg: "view and edit pars, or add new items" });
   })
   // create a new food item or reset the par
-  .post((req, res) => {
+
+  .post(jsonParser, async (req, res) => {
+    console.log(req.body);
     const { name, par } = req.body;
 
-    res.json({ mssg: "sending a new par/item through!" });
+    const foodExists = await Food.findOne({ name: name });
+
+    if (!foodExists) {
+      try {
+        const food = await Food.create({ name, par });
+        res.status(200).json(food);
+      } catch (error) {
+        res.status(400).json({ error: error.message });
+      }
+    } else {
+      try {
+        const updatedPar = { par: par };
+        await foodExists.updateOne(updatedPar);
+        const updatedFood = await Food.findOne({ name: name });
+        res.status(200).json(updatedFood);
+      } catch (error) {
+        res.status(400).json({ error: error.message });
+      }
+    }
+
     // redirect to home page
   });
 
