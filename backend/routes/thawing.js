@@ -1,34 +1,61 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 
+const Pull = require("../models/Pull");
 const User = require("../models/Users");
 const Food = require("../models/Food");
+const { authUser } = require("../authorization");
 
 const router = express.Router();
 
 const jsonParser = bodyParser.json();
 
-// home page, depending on type of user
-router.get("/", (req, res) => {
-  res.json({ mssg: "show main page" });
-});
-
 // login page
 router
   .route("/login")
   .get((req, res) => {
-    res.json({ mssg: "this is the login page" });
+    console.log("made it to login");
+    res.send("this is the login page");
   })
   .post((req, res) => {
-    res.json({ mssg: "User has submitted login data" });
-    // redirect to homepage
+    const { name, password } = req.body;
+    const user = {
+      name: name,
+      password: "hashedValue",
+      id: 1,
+    };
+
+    if (user && user.password === password) {
+      req.session.user = user;
+      res.redirect("/");
+    } else {
+      res.json({ mssg: "invalid login data" });
+    }
   });
 
-router.get("/thawed-boh", (req, res) => {
-  res.json({
-    mssg: "begin a pull, clearing any old ones, and then count thawed food in boh",
+router
+  .route("/thawed-boh")
+  .get((req, res) => {
+    // if thawed-boh count already complete, redirect to next
+    res.json({
+      mssg: "begin a pull, clearing any old ones, and then count thawed food in boh",
+    });
+  })
+  .post(jsonParser, async (req, res) => {
+    const { foods } = req.body;
+    console.log(foods);
+    try {
+      const pull = await Pull.create({
+        whoStarted: "placeholderUser",
+        foods: foods,
+      });
+      res.json(pull);
+    } catch (error) {
+      console.log("error: ", error);
+    }
+
+    // redirect to thawed foh once complete
   });
-});
 
 router.get("/thawed-foh", (req, res) => {
   res.json({ mssg: "count thawed food in foh" });
@@ -88,6 +115,16 @@ router.get("/review/:id", (req, res) => {
 // show list of last 10 pulls
 router.get("/review", (req, res) => {
   res.json({ mssg: "heres the results from that one pull" });
+});
+
+// home page, depending on type of user
+router.get("/", (req, res) => {
+  console.log(req.session.user);
+  if (req.session.user) {
+    res.send(`Welcome, ${req.session.user.name}`);
+  } else {
+    return res.redirect("login");
+  }
 });
 
 module.exports = router;

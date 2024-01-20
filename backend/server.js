@@ -1,18 +1,32 @@
 require("dotenv").config();
-const { connectToDb, getDb } = require("./db");
+// const { connectToDb, getDb } = require("./db");
 
 const express = require("express");
+const session = require("express-session");
 const mongoose = require("mongoose");
 const pullRoutes = require("./routes/thawing");
+const bodyParser = require("body-parser");
 
 // express app
 const app = express();
+
+app.use(bodyParser.json());
 
 // middleware
 app.use((req, res, next) => {
   console.log(req.path, req.method);
   next();
 });
+
+app.use(
+  session({
+    secret: "temporaryStringsfhsjklahfs",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+app.use("/restaurant", pullRoutes);
 
 // connect to db
 mongoose
