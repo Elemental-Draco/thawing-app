@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
 
 const Pull = require("../models/Pull");
 const User = require("../models/Users");
@@ -14,24 +15,37 @@ const jsonParser = bodyParser.json();
 router
   .route("/login")
   .get((req, res) => {
-    console.log("made it to login");
     res.send("this is the login page");
   })
-  .post((req, res) => {
+  .post(async (req, res) => {
     const { name, password } = req.body;
-    const user = {
-      name: name,
-      password: "hashedValue",
-      id: 1,
-    };
+    const user = await User.findOne({ username: name });
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
-    if (user && user.password === password) {
+    if (user && passwordMatch) {
       req.session.user = user;
+      console.log(user);
       res.redirect("/");
     } else {
       res.json({ mssg: "invalid login data" });
     }
   });
+
+router.post("/logout", async (req, res) => {
+  req.session.user = null;
+  console.log("user logged out, ", req.session.user);
+  res.redirect("login");
+});
+
+router.post("create-user", async (req, res) => {
+  const { username, password, role } = req.body;
+  try {
+    const newUser = await User.create({ username, password, role });
+    res.send(newUser);
+  } catch (err) {
+    console.log(err);
+  }
+});
 
 router
   .route("/thawed-boh")
@@ -118,10 +132,10 @@ router.get("/review", (req, res) => {
 });
 
 // home page, depending on type of user
-router.get("/", (req, res) => {
+router.get("/", authUser, (req, res) => {
   console.log(req.session.user);
   if (req.session.user) {
-    res.send(`Welcome, ${req.session.user.name}`);
+    res.send(`Welcome, ${req.session.user.username}`);
   } else {
     return res.redirect("login");
   }
