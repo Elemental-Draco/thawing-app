@@ -23,7 +23,14 @@ const pullSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  foods: [{ name: String, boh: Number, foh: Number, howManyPulled: Number }],
+  foods: [
+    {
+      name: String,
+      boh: { type: Number, default: 0 },
+      foh: { type: Number, default: 0 },
+      howManyPulled: { type: Number, default: 0 },
+    },
+  ],
 });
 
 module.exports = mongoose.model("Pull", pullSchema);

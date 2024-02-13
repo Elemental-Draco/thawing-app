@@ -23,6 +23,7 @@ app.use(
     secret: "temporaryStringsfhsjklahfs",
     resave: false,
     saveUninitialized: true,
+    cookie: { maxAge: 999999999999 },
   })
 );
 
