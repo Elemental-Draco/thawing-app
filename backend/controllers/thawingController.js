@@ -63,7 +63,6 @@ async function trackPull(req, res) {
         foods: foodHolder,
         bohComplete: true,
       });
-      console.log(currentPull);
     } catch (error) {
       console.log("error: ", error);
     }
@@ -98,16 +97,30 @@ async function trackPull(req, res) {
       );
       res.send(finalUpdate);
     } catch (error) {
-      console.log(error);
+      res.send(error);
     }
   } else {
     res.send("strange error");
   }
-  // for subsequent pulls, need to find a way to save id of specific pull so as to specify which pull to change the data of
+}
+
+async function createUser(req, res) {
+  const { username, password, role } = req.body;
+  const usernameExist = await User.find({ username: username });
+  if (usernameExist) {
+    return res.send("error, username already exists");
+  }
+  try {
+    const newUser = await User.create({ username, password, role });
+    res.send(newUser);
+  } catch (error) {
+    res.send(error);
+  }
 }
 
 module.exports = {
   editPar,
   getHomePage,
   trackPull,
+  createUser,
 };

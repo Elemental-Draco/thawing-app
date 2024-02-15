@@ -11,6 +11,7 @@ const {
   editPar,
   getHomePage,
   trackPull,
+  createUser,
 } = require("../controllers/thawingController");
 
 const router = express.Router();
@@ -45,19 +46,10 @@ router.post("/logout", async (req, res) => {
 });
 
 // create a user
-router.post("create-user", async (req, res) => {
-  const { username, password, role } = req.body;
-  try {
-    const newUser = await User.create({ username, password, role });
-    res.send(newUser);
-  } catch (err) {
-    console.log(err);
-  }
-});
+router.post("create-user", createUser);
 
 // first step in pull
-router.get("/thawed-boh", (req, res) => {
-  const incompletePulls = Pull.find({ whoFinished: "" });
+router.get("/thawed-boh", async (req, res) => {
   // if thawed-boh count already complete, redirect to next
   res.json({
     mssg: "begin a pull, clearing any old ones, and then count thawed food in boh",
