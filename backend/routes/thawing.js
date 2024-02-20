@@ -22,19 +22,25 @@ const jsonParser = bodyParser.json();
 router
   .route("/login")
   .get((req, res) => {
-    res.send("this is the login page");
+    res.json({ msg: "this is the login page" });
   })
   .post(async (req, res) => {
     const { name, password } = req.body;
-    const user = await User.findOne({ username: name });
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    let passwordMatch = false;
+    try {
+      const user = await User.findOne({ username: name });
+      if (user) {
+        passwordMatch = await bcrypt.compare(password, user.password);
+      }
 
-    if (user && passwordMatch) {
-      req.session.user = user;
-      console.log(user);
-      res.redirect("/");
-    } else {
-      res.json({ mssg: "invalid login data" });
+      if (user && passwordMatch) {
+        req.session.user = user;
+        res.json({ user: user });
+      } else {
+        res.status(500).json({ mssg: "invalid login data" });
+      }
+    } catch (error) {
+      console.error("sign in failure: ", error);
     }
   });
 
