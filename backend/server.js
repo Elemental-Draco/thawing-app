@@ -55,4 +55,4 @@ mongoose
 
 // if user not logged in, redirect to login
 // else, allow request to proceed
-app.use("/restaurant", pullRoutes);
+app.use("/", pullRoutes);

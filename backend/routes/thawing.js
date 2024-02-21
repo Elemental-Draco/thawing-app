@@ -18,6 +18,10 @@ const router = express.Router();
 
 const jsonParser = bodyParser.json();
 
+router.get("/check-logged-in", authUser, (req, res) => {
+  res.send(req.session.user);
+});
+
 // login page
 router
   .route("/login")
