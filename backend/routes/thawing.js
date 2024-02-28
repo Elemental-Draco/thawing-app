@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const Pull = require("../models/Pull");
 const User = require("../models/Users");
 const Food = require("../models/Food");
-const { authUser } = require("../authorization");
+const { authUser, isSupervisor } = require("../authorization");
 
 const {
   editPar,
@@ -19,6 +19,10 @@ const router = express.Router();
 const jsonParser = bodyParser.json();
 
 router.get("/check-logged-in", authUser, (req, res) => {
+  res.send(req.session.user);
+});
+
+router.get("/check-supervisor", isSupervisor, (req, res) => {
   res.send(req.session.user);
 });
 
@@ -56,7 +60,7 @@ router.post("/logout", async (req, res) => {
 });
 
 // create a user
-router.post("create-user", createUser);
+router.post("/create-user", createUser);
 
 // first step in pull
 router.get("/thawed-boh", async (req, res) => {
@@ -64,7 +68,6 @@ router.get("/thawed-boh", async (req, res) => {
   res.json({
     mssg: "begin a pull, clearing any old ones, and then count thawed food in boh",
   });
-  // redirect to thawed foh once complete
 });
 
 // second step in the pull

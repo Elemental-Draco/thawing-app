@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 
-const ProtectedRoutes = () => {
+const ProtectedRoutes = (props) => {
+  console.log(props);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -12,12 +13,10 @@ const ProtectedRoutes = () => {
         if (!response.ok) {
           setIsLoggedIn(false);
           setLoading(false);
-          console.log("not ok", isLoggedIn);
           throw new Error("User not valid");
         } else {
           setIsLoggedIn(true);
           setLoading(false);
-          console.log("is ok", isLoggedIn);
         }
       } catch (error) {
         setIsLoggedIn(false);
@@ -32,7 +31,14 @@ const ProtectedRoutes = () => {
   if (loading) {
     return <div>Loading...</div>;
   }
-  return isLoggedIn ? <Outlet /> : <Navigate to="/login" />;
+  return isLoggedIn ? (
+    <Outlet />
+  ) : (
+    <Navigate
+      to="/login"
+      message={props.message ? props.message : "not found"}
+    />
+  );
 };
 
 export default ProtectedRoutes;

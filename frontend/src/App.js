@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ProtectedRoutes from "./ProtectedRoutes";
+import SupervisorRoutes from "./SupervisorRoutes";
 
 function App() {
   return (
@@ -14,6 +15,12 @@ function App() {
             <Route>
               <Route path="/" element={<Home />} />
             </Route>
+          </Route>
+          <Route element={<SupervisorRoutes />}>
+            <Route
+              path="/thawed-boh"
+              element={<div>this is the thawed boh page</div>}
+            />
           </Route>
           <Route path="/login" element={<Login />} />
         </Routes>
