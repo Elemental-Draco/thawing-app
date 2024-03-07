@@ -106,8 +106,10 @@ async function trackPull(req, res) {
 
 async function createUser(req, res) {
   const { username, password, role } = req.body;
+
   const usernameExist = await User.find({ username: username });
-  if (usernameExist) {
+  console.log(usernameExist);
+  if (usernameExist.length) {
     return res.send("error, username already exists");
   }
   try {

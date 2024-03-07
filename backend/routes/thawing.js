@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const Pull = require("../models/Pull");
 const User = require("../models/Users");
 const Food = require("../models/Food");
-const { authUser } = require("../authorization");
+const { authUser, isSupervisor } = require("../authorization");
 
 const {
   editPar,
@@ -18,43 +18,67 @@ const router = express.Router();
 
 const jsonParser = bodyParser.json();
 
+router.get("/check-logged-in", authUser, (req, res) => {
+  res.send(req.session.user);
+});
+
+router.get("/check-supervisor", isSupervisor, (req, res) => {
+  res.send(req.session.user);
+});
+
 // login page
 router
   .route("/login")
   .get((req, res) => {
-    res.send("this is the login page");
+    res.json({ msg: "this is the login page" });
   })
   .post(async (req, res) => {
     const { name, password } = req.body;
-    const user = await User.findOne({ username: name });
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    let passwordMatch = false;
+    try {
+      const user = await User.findOne({ username: name });
+      if (user) {
+        passwordMatch = await bcrypt.compare(password, user.password);
+      }
 
-    if (user && passwordMatch) {
-      req.session.user = user;
-      console.log(user);
-      res.redirect("/");
-    } else {
-      res.json({ mssg: "invalid login data" });
+      if (user && passwordMatch) {
+        req.session.user = user;
+        res.json({ user: user });
+      } else {
+        res.status(500).json({ mssg: "invalid login data" });
+      }
+    } catch (error) {
+      console.error("sign in failure: ", error);
     }
   });
 
 // logout function
 router.post("/logout", async (req, res) => {
   req.session.user = null;
+  req.session.destroy();
   console.log("user logged out, ", req.session.user);
-  res.redirect("login");
+  res.redirect("/login");
 });
 
 // create a user
-router.post("create-user", createUser);
+router.post("/create-user", createUser);
 
 // first step in pull
 router.get("/thawed-boh", async (req, res) => {
-  // if thawed-boh count already complete, redirect to next
-  res.json({
-    mssg: "begin a pull, clearing any old ones, and then count thawed food in boh",
-  });
-  // redirect to thawed foh once complete
+  try {
+    let foods;
+    const prevPull = await Pull.findOne({ pullComplete: false });
+    if (!prevPull) {
+      foods = await Food.find({});
+      res.json(foods);
+    } else if (prevPull.bohComplete) {
+      res.redirect("/thawed-foh");
+    } else {
+      res.redirect("/pull-frozen");
+    }
+  } catch (error) {
+    res.send(error);
+  }
 });
 
 // second step in the pull
