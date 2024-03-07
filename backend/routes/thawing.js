@@ -55,8 +55,9 @@ router
 // logout function
 router.post("/logout", async (req, res) => {
   req.session.user = null;
+  req.session.destroy();
   console.log("user logged out, ", req.session.user);
-  res.redirect("login");
+  res.redirect("/login");
 });
 
 // create a user
@@ -64,10 +65,20 @@ router.post("/create-user", createUser);
 
 // first step in pull
 router.get("/thawed-boh", async (req, res) => {
-  // if thawed-boh count already complete, redirect to next
-  res.json({
-    mssg: "begin a pull, clearing any old ones, and then count thawed food in boh",
-  });
+  try {
+    let foods;
+    const prevPull = await Pull.findOne({ pullComplete: false });
+    if (!prevPull) {
+      foods = await Food.find({});
+      res.json(foods);
+    } else if (prevPull.bohComplete) {
+      res.redirect("/thawed-foh");
+    } else {
+      res.redirect("/pull-frozen");
+    }
+  } catch (error) {
+    res.send(error);
+  }
 });
 
 // second step in the pull

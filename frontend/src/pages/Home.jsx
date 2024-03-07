@@ -19,7 +19,7 @@ const Home = () => {
         <ul>
           <li>
             {/* all buttons visible, but depending on what role the user is, some buttons will be greyed out */}
-            <Link to={"/thawed-boh"}>Start Pull</Link>
+            <Link to="/thawed-boh">Start Pull</Link>
           </li>
         </ul>
       </div>

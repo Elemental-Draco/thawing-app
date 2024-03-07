@@ -22,7 +22,7 @@ const Navbar = () => {
   }
   return (
     <nav>
-      <p>Home</p>
+      <p>Logo</p>
       <button onClick={handleLogout}>Logout</button>
     </nav>
   );
